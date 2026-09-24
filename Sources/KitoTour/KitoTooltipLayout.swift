@@ -9,6 +9,8 @@
 import CoreGraphics
 
 /// A side of the highlighted element. `leading` is the low-x side of the coordinate space.
+/// Tours and `.kitoTooltip` hand the layout frames in layout-direction coordinates (x counted
+/// from the right in right-to-left languages), so `.leading` is the side text starts from.
 public enum KitoTooltipSide: String, Sendable, CaseIterable {
     case top
     case bottom
@@ -162,6 +164,16 @@ public struct KitoTooltipLayout: Equatable, Sendable {
 
 /// The hole a spotlight cuts: a rectangle and a corner radius, so every shape (rounded rect,
 /// capsule, circle) can morph smoothly into any other.
+/// Anchor and global frames are physical (x from the screen's left edge), while `.position`,
+/// offsets and shapes are laid out along the layout direction (x from the right edge in
+/// right-to-left languages). This moves a physical rect into layout coordinates.
+enum KitoTourGeometry {
+    static func layoutRect(_ rect: CGRect, inWidth width: CGFloat, rightToLeft: Bool) -> CGRect {
+        guard rightToLeft else { return rect }
+        return CGRect(x: width - rect.maxX, y: rect.minY, width: rect.width, height: rect.height)
+    }
+}
+
 public struct KitoSpotlightCutout: Equatable, Sendable {
     public var rect: CGRect
     public var cornerRadius: CGFloat

@@ -187,11 +187,15 @@ struct KitoTourStage: View {
     let anchors: [String: Anchor<CGRect>]
     let celebrating: Bool
 
+    @Environment(\.layoutDirection) private var layoutDirection
+
+    private var rightToLeft: Bool { layoutDirection == .rightToLeft }
+
     var body: some View {
         GeometryReader { outer in
-            let safeGlobal = Self.safeFrame(outer)
+            let safeGlobal = Self.safeFrame(outer, rightToLeft: rightToLeft)
             GeometryReader { proxy in
-                layer(proxy, safe: Self.local(safeGlobal, in: proxy))
+                layer(proxy, safe: Self.local(safeGlobal, in: proxy, rightToLeft: rightToLeft))
             }
             .ignoresSafeArea()
         }
@@ -201,11 +205,11 @@ struct KitoTourStage: View {
     private func layer(_ proxy: GeometryProxy, safe: CGRect) -> some View {
         if style == .checklist {
             let step = controller.currentStep
-            let target = step.flatMap { anchors[$0.anchor] }.map { proxy[$0] }
+            let target = step.flatMap { anchors[$0.anchor] }.map { frame($0, in: proxy) }
             KitoChecklistTourView(controller: controller, step: step, target: target, size: proxy.size, safe: safe,
                                   palette: palette, celebrating: celebrating)
         } else if let step = controller.currentStep {
-            let target = anchors[step.anchor].map { proxy[$0] }
+            let target = anchors[step.anchor].map { frame($0, in: proxy) }
             let scene = KitoTourScene(controller: controller, step: step, target: target, size: proxy.size,
                                       safe: safe, palette: palette)
             styled(scene)
@@ -226,19 +230,27 @@ struct KitoTourStage: View {
         }
     }
 
-    /// The outer reader's safe region, in global coordinates.
-    private static func safeFrame(_ proxy: GeometryProxy) -> CGRect {
+    /// An anchor's frame in this layer, in layout-direction coordinates (anchors resolve to
+    /// physical ones, while `.position` and shapes here mirror in right-to-left layouts).
+    private func frame(_ anchor: Anchor<CGRect>, in proxy: GeometryProxy) -> CGRect {
+        KitoTourGeometry.layoutRect(proxy[anchor], inWidth: proxy.size.width, rightToLeft: rightToLeft)
+    }
+
+    /// The outer reader's safe region, in global (physical) coordinates.
+    private static func safeFrame(_ proxy: GeometryProxy, rightToLeft: Bool) -> CGRect {
         let frame = proxy.frame(in: .global)
         let insets = proxy.safeAreaInsets
-        return CGRect(x: frame.minX + insets.leading, y: frame.minY + insets.top,
+        let left = rightToLeft ? insets.trailing : insets.leading
+        return CGRect(x: frame.minX + left, y: frame.minY + insets.top,
                       width: max(0, frame.width - insets.leading - insets.trailing),
                       height: max(0, frame.height - insets.top - insets.bottom))
     }
 
-    /// `global` moved into `proxy`'s coordinates, with a margin so tips never touch the edges.
-    private static func local(_ global: CGRect, in proxy: GeometryProxy) -> CGRect {
+    /// `global` moved into `proxy`'s layout-direction coordinates, with a margin so tips never
+    /// touch the edges.
+    private static func local(_ global: CGRect, in proxy: GeometryProxy, rightToLeft: Bool) -> CGRect {
         let origin = proxy.frame(in: .global).origin
         let moved = global.offsetBy(dx: -origin.x, dy: -origin.y)
-        return moved.insetBy(dx: 12, dy: 8)
+        return KitoTourGeometry.layoutRect(moved, inWidth: proxy.size.width, rightToLeft: rightToLeft).insetBy(dx: 12, dy: 8)
     }
 }

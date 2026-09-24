@@ -91,6 +91,7 @@ private struct KitoTooltipModifier: ViewModifier {
     @Environment(\.kitoTooltipBounds) private var customBounds
     @Environment(\.kitoTheme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.layoutDirection) private var layoutDirection
 
     func body(content: Content) -> some View {
         content
@@ -111,10 +112,13 @@ private struct KitoTooltipModifier: ViewModifier {
         }
     }
 
-    /// The allowed area in this view's own coordinates.
+    /// The allowed area in this view's own layout-direction coordinates (global frames are
+    /// physical; the tip's `.position` mirrors in right-to-left layouts).
     private var localBounds: CGRect {
         let global = customBounds ?? KitoTooltipScreen.safeBounds()
-        return global.offsetBy(dx: -anchorFrame.minX, dy: -anchorFrame.minY).insetBy(dx: 12, dy: 8)
+        let local = global.offsetBy(dx: -anchorFrame.minX, dy: -anchorFrame.minY)
+        return KitoTourGeometry.layoutRect(local, inWidth: anchorFrame.width, rightToLeft: layoutDirection == .rightToLeft)
+            .insetBy(dx: 12, dy: 8)
     }
 
     private func dismissLater() async {

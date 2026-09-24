@@ -14,7 +14,9 @@ public enum KitoTourPlacement: String, Sendable, CaseIterable {
     case auto
     case top
     case bottom
+    /// Before the element in reading order: to its left, or its right in right-to-left languages.
     case leading
+    /// After the element in reading order: to its right, or its left in right-to-left languages.
     case trailing
 
     /// The side asked for, or `nil` for `.auto`.

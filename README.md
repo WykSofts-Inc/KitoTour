@@ -146,6 +146,14 @@ Skip is on every step, and the two-finger scrub gesture skips too. Spotlight, ca
 tours keep VoiceOver inside the tour; pulse and checklist tours leave the screen usable. With
 Reduce Motion, the spotlight fades between elements instead of gliding, and beacons stop pulsing.
 
+## Right-to-left
+
+- Tips, the spotlight, beacons, cards and coach-mark arrows land on the right element in Arabic or Hebrew:
+  anchor and global frames are physical, so they are converted to layout-direction coordinates before placing anything.
+- `.leading` / `.trailing` placements follow reading order: `.leading` puts the tip on the element's right in RTL,
+  and the arrow sits on the matching edge.
+- Back and Next use `chevron.backward` / `arrow.forward`, so they point the right way.
+
 ## Installation
 
 ```swift

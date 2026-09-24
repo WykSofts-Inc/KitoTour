@@ -70,7 +70,7 @@ struct KitoTourTipContent: View {
             }
             Spacer(minLength: theme.spacing.sm)
             if !controller.isFirstStep && !compact {
-                Button { controller.back() } label: { Image(systemName: "chevron.left") }
+                Button { controller.back() } label: { Image(systemName: "chevron.backward") }
                     .buttonStyle(KitoTourRoundButtonStyle(palette: palette))
                     .accessibilityLabel("Previous step")
             }
@@ -94,7 +94,7 @@ struct KitoTourNextButton: View {
             HStack(spacing: 6) {
                 Text(title)
                 if !controller.isLastStep && step.actionTitle == nil {
-                    Image(systemName: "arrow.right").font(.caption.weight(.bold))
+                    Image(systemName: "arrow.forward").font(.caption.weight(.bold))
                 }
             }
         }

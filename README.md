@@ -1,5 +1,7 @@
 # KitoTour
 
+**[Documentation](https://wyksofts-inc.github.io/KitoTour/documentation/kitotour/)**
+
 Product tours for SwiftUI: point at real views with a spotlight that glides and morphs from one
 element to the next, a pulsing beacon, a card that follows along, hand-drawn coach marks or a
 "Getting started 2/5" checklist. Standalone tooltips that flip to stay on screen, "New" badges
